@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 public enum SpellType { Offensive, Defensive, Healing, Utility, Stealth }
+public delegate void SpellUpdateMethod();
 
 /*
  * All Spells have:
@@ -12,6 +10,9 @@ public enum SpellType { Offensive, Defensive, Healing, Utility, Stealth }
  */
 public abstract class Spell
 {
+
+    public readonly string _name;
+
     public SpellType spellType;
 
     public float manaCost;
@@ -19,6 +20,16 @@ public abstract class Spell
     protected Cast _cast;
     protected Delivery _delivery;
     protected Effect _effect;
+
+    public readonly Entity _owningEntity;
+
+    protected SpellUpdateMethod spellUpdateMethods;
+
+    public Spell(Entity entity, string name)
+    {
+        _owningEntity = entity;
+        _name = name;
+    }
 
     /// <summary>
     /// Called when the button is first pressed.
@@ -28,27 +39,40 @@ public abstract class Spell
 
     public abstract void OnAbort();
 
-    /// <summary>
-    /// Called while a projectile spell is traveling.
-    /// </summary>
-    public abstract void OnTraveling();
-
-    /// <summary>
-    /// Called when a spell's projectile collides with something.
-    /// </summary>
-    public abstract void OnCollision();
 
     /// <summary>
     /// Called when a spell's effect is triggered.
     /// </summary>
-    public void OnEffectTrigger() => _effect.OnEffectStart();
+    public void OnEffectTrigger()
+    {
+        DeductMana();
+        _effect.OnEffectStart();
+    }
 
-    public abstract void Update();
+    public void EffectDelivered(Entity entityToDeliverEffect) // ?????
+    {
+
+    }
+
+    public void AddSpellUpdateMethod(SpellUpdateMethod updateMethod) => spellUpdateMethods += updateMethod;
+
+    public void RemoveSpellUpdateMethod(SpellUpdateMethod updateMethod) => spellUpdateMethods -= updateMethod;
+
+    public void Update() => spellUpdateMethods();
+
+    public bool CheckMana => _owningEntity.EnoughManaForSpell(manaCost);
+
+    public void DeductMana() => _owningEntity.ChangeMana(manaCost);
 
 }
 
+/*
+
 public abstract class InstantCastSpell : Spell
 {
+
+    public InstantCastSpell(Entity entity) : base(entity) { }
+
     /// <summary>
     /// Called when the button is first pressed.
     /// Sometimes this will be the start and end of the spell, sometimes this will begin charging and calling OnCastingOverTime.
@@ -106,3 +130,4 @@ public abstract class ContinuousSpell : SpellOverTime
 {
 
 }
+*/

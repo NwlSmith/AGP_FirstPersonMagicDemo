@@ -19,7 +19,7 @@ public abstract class Cast
 
 }
 
-public abstract class InstantCast : Cast
+public class InstantCast : Cast
 {
     public InstantCast(Spell spell) : base(spell)
     {
@@ -37,6 +37,11 @@ public abstract class OverTimeCast : Cast
 
     }
 
+    public override void OnStartCasting()
+    {
+        _spell.AddSpellUpdateMethod(OnCastingOverTime);
+    }
+
     /// <summary>
     /// Called when button is pressed continuously.
     /// Ongoing mana drain/casting animations.
@@ -47,10 +52,23 @@ public abstract class OverTimeCast : Cast
     /// Called when button is released.
     /// Triggers charged spells to be triggered or ongoing spells to finish.
     /// </summary>
-    public abstract void OnFinishCasting();
+    public virtual void OnFinishCasting()
+    {
+        _spell.RemoveSpellUpdateMethod(OnCastingOverTime);
+    }
+
+    /// <summary>
+    /// Called when button is released and charging is not finished.
+    /// Restores spent mana / plays spell fail audio
+    /// </summary>
+    public void OnAbortCasting()
+    {
+        _spell.RemoveSpellUpdateMethod(OnCastingOverTime);
+        _spell.OnAbort();
+    }
 }
 
-public abstract class ChargeCast : OverTimeCast
+public class ChargeCast : OverTimeCast
 {
 
     protected float _elapsedTime;
@@ -61,36 +79,61 @@ public abstract class ChargeCast : OverTimeCast
         _chargeDuration = duration;
     }
 
+    public override void OnStartCasting()
+    {
+        base.OnStartCasting();
+        _elapsedTime = 0f;
+    }
+
     public override void OnCastingOverTime()
     {
         _elapsedTime += Time.deltaTime;
 
-        if (_elapsedTime >= _chargeDuration)
+        if (Input.GetButtonUp("Fire1"))
         {
-            OnFinishCasting();
-        }
-        else
-        {
-            // Check if let go of input, if yes, abort casting
+            if (_elapsedTime >= _chargeDuration)
+            {
+                OnFinishCasting();
+            }
+            else
+            {
+                OnAbortCasting();
+            }
         }
     }
 
-    /// <summary>
-    /// Called when button is released and charging is not finished.
-    /// Restores spent mana / plays spell fail audio
-    /// </summary>
-    public void OnAbortCasting()
+    public override void OnFinishCasting()
     {
-        _spell.OnAbort();
+        base.OnFinishCasting();
+        _spell.OnEffectTrigger();
     }
 }
 
-public abstract class ContinuousCast : OverTimeCast
+public class ContinuousCast : OverTimeCast
 {
     public ContinuousCast(Spell spell) : base(spell)
     {
 
     }
+
+    public override void OnStartCasting() => base.OnStartCasting();
+
+    public override void OnCastingOverTime()
+    {
+        if (Input.GetButtonUp("Fire1"))
+        {
+            OnFinishCasting();
+            return;
+        }
+        else if (!_spell.CheckMana)
+        {
+            OnAbortCasting();
+            return;
+        }
+        
+        _spell.OnEffectTrigger();
+    }
+
 }
 
 
