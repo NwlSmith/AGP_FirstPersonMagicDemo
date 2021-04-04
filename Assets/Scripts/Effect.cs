@@ -1,23 +1,54 @@
 
-public interface Effect
-{
+public enum EffectType { FireDamage, IceDamage, ElectricDamage, ShieldBuff, Healing, Utility, Stealth }
 
-    void OnEffectStart();
+public abstract class Effect
+{
+    protected readonly Spell _spell;
+
+    public Effect(Spell spell)
+    {
+        _spell = spell;
+    }
+
+    public abstract void OnEffectStart();
+
+    protected abstract void ImbueEffects();
 
 }
 
-public interface EffectOverTime : Effect
+public abstract class EffectOverTime : Effect
 {
-    void OnEffectOverTime();
+    protected float _elapsedTime;
+    protected readonly float _effectDuration;
 
-    void OnEffectFinished();
+    public EffectOverTime(Spell spell, float duration) : base(spell)
+    {
+        _effectDuration = duration;
+    }
+
+    public override void OnEffectStart()
+    {
+
+    }
+
+    public void OnEffectOverTime()
+    {
+        ImbueEffects();
+    }
+
+    public abstract void OnEffectFinished();
 }
 
-public interface AreaOfEffect : Effect
+public abstract class AreaOfEffect : Effect
 {
-    float RadiusOfArea { get; }
+    protected readonly float _radiusOfArea;
 
-    Entity[] EntitiesWithinArea { get; }
+    public AreaOfEffect(Spell spell, float radius) : base(spell)
+    {
+        _radiusOfArea = radius;
+    }
+
+    protected abstract Entity[] GetEntitiesWithinArea();
 }
 
 
