@@ -1,3 +1,6 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public enum SpellType { Offensive, Defensive, Healing, Utility, Stealth }
 public delegate void SpellUpdateMethod();
@@ -39,6 +42,11 @@ public abstract class Spell
 
     public abstract void OnAbort();
 
+    /// <summary>
+    /// Cast has called for the delivery method to be employed.
+    /// </summary>
+    public void CastDelivery() => _delivery.Deliver();
+
 
     /// <summary>
     /// Called when a spell's effect is triggered.
@@ -63,6 +71,10 @@ public abstract class Spell
     public bool CheckMana => _owningEntity.EnoughManaForSpell(manaCost);
 
     public void DeductMana() => _owningEntity.ChangeMana(manaCost);
+
+    public Vector3 EntityLocation => _owningEntity.Location;
+
+    public Vector3 EntityDirection => _owningEntity.Direction;
 
 }
 

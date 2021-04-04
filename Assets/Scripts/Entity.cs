@@ -8,7 +8,14 @@ public class Entity
     [SerializeField] protected float _currentHealth, _maxHealth = 100f;
     [SerializeField] protected float _currentMana, _maxMana = 100f;
 
-    private List<Effect> currentEffects = new List<Effect>();
+    protected List<Effect> currentEffects = new List<Effect>();
+
+    protected GameObject _gameObject;
+
+    public Entity(GameObject gameObject)
+    {
+        _gameObject = gameObject;
+    }
 
     public void Update()
     {
@@ -57,4 +64,8 @@ public class Entity
     {
         _currentMana = Mathf.Clamp(_currentMana + change, 0, _maxMana);
     }
+
+    public Vector3 Location => _gameObject.transform.position;
+
+    public Vector3 Direction => _gameObject.transform.rotation * Vector3.forward;
 }

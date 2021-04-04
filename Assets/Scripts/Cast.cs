@@ -21,12 +21,9 @@ public abstract class Cast
 
 public class InstantCast : Cast
 {
-    public InstantCast(Spell spell) : base(spell)
-    {
+    public InstantCast(Spell spell) : base(spell) { }
 
-    }
-
-    public override void OnStartCasting() => _spell.OnEffectTrigger();
+    public override void OnStartCasting() => _spell.CastDelivery();
 }
 
 public abstract class OverTimeCast : Cast
@@ -66,6 +63,7 @@ public abstract class OverTimeCast : Cast
         _spell.RemoveSpellUpdateMethod(OnCastingOverTime);
         _spell.OnAbort();
     }
+
 }
 
 public class ChargeCast : OverTimeCast
@@ -105,7 +103,7 @@ public class ChargeCast : OverTimeCast
     public override void OnFinishCasting()
     {
         base.OnFinishCasting();
-        _spell.OnEffectTrigger();
+        _spell.CastDelivery();
     }
 }
 
@@ -131,7 +129,7 @@ public class ContinuousCast : OverTimeCast
             return;
         }
         
-        _spell.OnEffectTrigger();
+        _spell.CastDelivery();
     }
 
 }
