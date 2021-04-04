@@ -69,10 +69,15 @@ public abstract class InstantCastSpell : Spell
     }
 }
 
-public class InstantHeal : InstantCastSpell
+public class HealSelfInstantSpell : InstantCastSpell
 {
 
-    public Effect effect = new InstantHeal();
+    private HealSelfInstantEffect _effect;
+
+    public HealSelfInstantSpell()
+    {
+        _effect = new HealSelfInstantEffect(10, Services.Player);
+    }
 
 }
 
