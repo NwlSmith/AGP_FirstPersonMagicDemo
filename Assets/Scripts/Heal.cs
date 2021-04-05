@@ -17,14 +17,14 @@ public abstract class HealEffect
 
 }
 
-public class HealSelfInstantEffect : HealEffect, Effect
+public class HealSelfInstantEffect : HealEffect
 {
     public HealSelfInstantEffect(float healAmount, Entity effected) : base(healAmount, effected) { }
 
     public void OnEffectStart() => HealPlayer();
 }
 
-public class HealSelfOverTimeEffect : HealEffect, EffectOverTime
+public class HealSelfOverTimeEffect : HealEffect
 {
     public HealSelfOverTimeEffect(float healAmount, Entity effected) : base(healAmount, effected) { }
 
@@ -41,7 +41,7 @@ public class HealSelfOverTimeEffect : HealEffect, EffectOverTime
     }
 }
 
-public class HealAOEEffect : HealEffect, AreaOfEffect
+public class HealAOEEffect : HealEffect
 {
 
     public float RadiusOfArea { get; private set; }

@@ -4,7 +4,12 @@ using UnityEngine;
 
 public class Player : Entity
 {
-    
+
+    public Player(GameObject gameObject) : base(gameObject)
+    {
+
+    }
+
     /// <summary>
     /// Player dies.
     /// </summary>

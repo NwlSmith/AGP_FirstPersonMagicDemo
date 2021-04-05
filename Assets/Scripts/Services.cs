@@ -23,7 +23,7 @@ public static class Services
 
     public static void InitializeServices()
     {
-        Player = new Player();
+        Player = new Player(new GameObject());
     }
     #endregion
 }
