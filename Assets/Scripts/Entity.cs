@@ -25,6 +25,9 @@ public class Entity
         }
     }
 
+    public void AddEffect(Effect effect) => currentEffects.Add(effect);
+    public void RemoveEffect(Effect effect) => currentEffects.Remove(effect);
+
 
     /// <summary>
     /// Changes health by change.

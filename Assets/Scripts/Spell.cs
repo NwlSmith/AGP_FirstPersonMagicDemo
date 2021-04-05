@@ -5,13 +5,14 @@ using UnityEngine;
 public enum SpellType { Offensive, Defensive, Healing, Utility, Stealth }
 public delegate void SpellUpdateMethod();
 
+
 /*
  * All Spells have:
  * - A cast procedure
  * - A delivery
  * - An effect
  */
-public abstract class Spell
+public class Spell
 {
 
     public readonly string _name;
@@ -38,9 +39,15 @@ public abstract class Spell
     /// Called when the button is first pressed.
     /// Sometimes this will be the start and end of the spell, sometimes this will begin charging and calling OnCastingOverTime.
     /// </summary>
-    public abstract void OnStartCasting();
+    public void OnStartCasting()
+    {
+        _cast.OnStartCasting();
+    }
 
-    public abstract void OnAbort();
+    public void OnAbort()
+    {
+        Debug.Log($"Spell {_name} aborted.");
+    }
 
     /// <summary>
     /// Cast has called for the delivery method to be employed.
@@ -57,9 +64,9 @@ public abstract class Spell
         _effect.OnEffectStart();
     }
 
-    public void EffectDelivered(Entity entityToDeliverEffect) // ?????
+    public void EffectDelivered(Entity entityToDeliverEffect) // ????? Should probably create a new effect?
     {
-
+        _effect.OnEffectStart();
     }
 
     public void AddSpellUpdateMethod(SpellUpdateMethod updateMethod) => spellUpdateMethods += updateMethod;
@@ -78,68 +85,12 @@ public abstract class Spell
 
 }
 
-/*
-
-public abstract class InstantCastSpell : Spell
+/// <summary>
+/// Takes in a csv file and creates spells with those attributes.
+/// </summary>
+public class SpellCreator
 {
 
-    public InstantCastSpell(Entity entity) : base(entity) { }
 
-    /// <summary>
-    /// Called when the button is first pressed.
-    /// Sometimes this will be the start and end of the spell, sometimes this will begin charging and calling OnCastingOverTime.
-    /// </summary>
-    public override void OnStartCasting() => OnEffectTrigger();
-
-    public override void Update()
-    {
-        return;
-    }
-}
-
-public class HealSelfInstantSpell : InstantCastSpell
-{
-
-    private HealSelfInstantEffect _effect;
-
-    public HealSelfInstantSpell()
-    {
-        _effect = new HealSelfInstantEffect(10, Services.Player);
-    }
 
 }
-
-public abstract class SpellOverTime : Spell
-{
-
-    /// <summary>
-    /// Called when button is pressed continuously.
-    /// Ongoing mana drain/casting animations.
-    /// </summary>
-    public abstract void OnCastingOverTime();
-
-    /// <summary>
-    /// Called when button is released.
-    /// Triggers charged spells to be triggered or ongoing spells to finish.
-    /// </summary>
-    public abstract void OnFinishCasting();
-    
-
-}
-
-public abstract class ChargeSpell : SpellOverTime
-{
-
-    /// <summary>
-    /// Called when button is released and charging is not finished.
-    /// Restores spent mana / plays spell fail audio
-    /// </summary>
-    public abstract void OnAbortCasting();
-
-}
-
-public abstract class ContinuousSpell : SpellOverTime
-{
-
-}
-*/

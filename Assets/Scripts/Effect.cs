@@ -34,28 +34,38 @@ public static class EffectEnumToFunction
 public abstract class Effect
 {
     protected readonly EffectType _type;
+    protected readonly Entity _entity;
     protected readonly Spell _spell;
     protected readonly float _magnitude;
 
-    public Effect(EffectType type, Spell spell, float magnitude)
+    public Effect(EffectType type, Entity entity, Spell spell, float magnitude)
     {
         _type = type;
+        _entity = entity;
         _spell = spell;
         _magnitude = magnitude;
     }
 
+    public abstract void Update();
+
     public abstract void OnEffectStart();
 
-    protected void ImbueEffects() => EffectEnumToFunction.Trigger(_type, _spell._owningEntity, _magnitude);
+    protected void ImbueEffects() => EffectEnumToFunction.Trigger(_type, _entity, _magnitude);
 
 }
 
 public class InstantEffect : Effect
 {
 
-    public InstantEffect(EffectType type, Spell spell, float magnitude) : base(type, spell, magnitude) { }
+    public InstantEffect(EffectType type, Entity entity, Spell spell, float magnitude) : base(type, entity, spell, magnitude) { }
 
-    public override void OnEffectStart() => ImbueEffects();
+    public override void OnEffectStart() => _entity.AddEffect(this);
+
+    public override void Update()
+    {
+        ImbueEffects();
+        _entity.RemoveEffect(this);
+    }
 
 }
 
@@ -64,27 +74,39 @@ public class EffectOverTime : Effect
     protected float _elapsedTime;
     protected readonly float _effectDuration;
 
-    public EffectOverTime(EffectType type, Spell spell, float magnitude, float duration) : base(type, spell, magnitude)
+    public EffectOverTime(EffectType type, Entity entity, Spell spell, float magnitude, float duration) : base(type, entity, spell, magnitude)
     {
         _effectDuration = duration;
     }
 
     public override void OnEffectStart()
     {
-
+        _elapsedTime = 0f;
+        _entity.AddEffect(this);
     }
+
+    public override void Update() => OnEffectOverTime();
 
     public void OnEffectOverTime()
     {
+        _elapsedTime += Time.deltaTime;
+
+        if (_elapsedTime >= _effectDuration)
+        {
+            OnEffectFinished();
+            return;
+        }
+
         ImbueEffects();
     }
 
     public void OnEffectFinished()
     {
-
+        _entity.RemoveEffect(this);
     }
 }
 
+// Kind of defunct
 public class AreaOfEffect : Effect
 {
     protected readonly LayerMask layers = 0;
@@ -92,15 +114,18 @@ public class AreaOfEffect : Effect
     protected readonly Vector3 _center;
     protected readonly float _radiusOfArea;
 
-    public AreaOfEffect(EffectType type, Spell spell, float magnitude, Vector3 location, float radius) : base(type, spell, magnitude)
+    public AreaOfEffect(EffectType type, Entity entity, Spell spell, float magnitude, Vector3 location, float radius) : base(type, entity, spell, magnitude)
     {
         _center = location;
         _radiusOfArea = radius;
     }
 
-    public override void OnEffectStart()
-    {
+    public override void OnEffectStart() => _entity.AddEffect(this);
 
+    public override void Update()
+    {
+        ImbueEffects();
+        _entity.RemoveEffect(this);
     }
 
     protected Entity[] GetEntitiesWithinArea()
